@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Regime Tax Calculator 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: -15px;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .inhand-salary {
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        /* Responsive CSS */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 20px;
+            }
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            input[type="text"], button {
+                font-size: 14px;
+            }
+            table {
+                font-size: 14px;
+            }
+            th, td {
+                padding: 6px;
+            }
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 18px;
+            }
+            .container {
+                padding: 10px;
+                margin: 5px;
+            }
+            input[type="text"], button {
+                font-size: 12px;
+            }
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>New Regime Tax Calculator 2025</h1>
+        <label for="salary">Enter Your Gross Salary (in ₹):</label>
+        <input type="text" id="salary" placeholder="Enter your gross salary" oninput="validateInput(this)">
+        <div class="error" id="error"></div>
+        <button onclick="calculateTax()">Calculate Tax</button>
+        <div class="result" id="result"></div>
+        <div class="inhand-salary" id="inhandSalary" style="display: none;">
+            Your In-Hand Monthly Salary: ₹<span id="inhandAmount"></span>
+        </div>
+        <div id="calculationDetails" style="display: none;">
+            <h2>Tax Calculation Details</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Step</th>
+                        <th>Calculation</th>
+                        <th>Tax</th>
+                    </tr>
+                </thead>
+                <tbody id="calculationSteps">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function validateInput(input) {
+            const errorElement = document.getElementById('error');
+            // Remove non-numeric characters
+            input.value = input.value.replace(/[^0-9]/g, '');
+            if (input.value.length === 0) {
+                errorElement.innerText = 'Please enter a valid number.';
+            } else {
+                errorElement.innerText = '';
+            }
+        }
+
+        function calculateTax() {
+            const salaryInput = document.getElementById('salary').value;
+            if (salaryInput === '') {
+                document.getElementById('error').innerText = 'Please enter a valid number.';
+                return;
+            }
+
+            const grossSalary = parseFloat(salaryInput);
+            const standardDeduction = 75000;
+            const netIncome = grossSalary - standardDeduction;
+
+            // Check if income is less than or equal to 12,00,000
+            if (netIncome <= 1200000) {
+                document.getElementById('result').innerText = 'As per the new regime, your income tax slab is ₹0.';
+                document.getElementById('calculationDetails').style.display = 'none';
+                document.getElementById('inhandSalary').style.display = 'none';
+                return;
+            }
+
+            let remainingIncome = netIncome;
+            let totalTax = 0;
+
+            const taxSlabs = [
+                { limit: 400000, rate: 0 },
+                { limit: 400000, rate: 0.05 },
+                { limit: 400000, rate: 0.10 },
+                { limit: 400000, rate: 0.15 },
+                { limit: 400000, rate: 0.20 },
+                { limit: 400000, rate: 0.25 },
+                { limit: Infinity, rate: 0.30 }
+            ];
+
+            const calculationSteps = [];
+            let step = 1;
+
+            // Add standard deduction step
+            calculationSteps.push({
+                step: step++,
+                calculation: `Gross Salary: ₹${grossSalary.toLocaleString()} - Standard Deduction: ₹${standardDeduction.toLocaleString()} = Net Income: ₹${netIncome.toLocaleString()}`,
+                tax: `₹0 (Standard Deduction)`
+            });
+
+            for (const slab of taxSlabs) {
+                if (remainingIncome <= 0) break;
+
+                const taxableAmount = Math.min(remainingIncome, slab.limit);
+                const tax = taxableAmount * slab.rate;
+                totalTax += tax;
+                calculationSteps.push({
+                    step: step++,
+                    calculation: `${remainingIncome.toLocaleString()} - ${taxableAmount.toLocaleString()} = ${(remainingIncome - taxableAmount).toLocaleString()}`,
+                    tax: `₹${tax.toLocaleString()} (${slab.rate * 100}%)`
+                });
+                remainingIncome -= taxableAmount;
+            }
+
+            // Display tax result
+            document.getElementById('result').innerText = `Your Tax Amount is: ₹${totalTax.toFixed(2)}`;
+
+            // Calculate and display in-hand monthly salary
+            const inHandSalary = (grossSalary - totalTax) / 12;
+            document.getElementById('inhandAmount').innerText = inHandSalary.toFixed(2);
+            document.getElementById('inhandSalary').style.display = 'block';
+
+            // Display calculation details
+            document.getElementById('calculationDetails').style.display = 'block';
+
+            const calculationStepsElement = document.getElementById('calculationSteps');
+            calculationStepsElement.innerHTML = calculationSteps.map(step => `
+                <tr>
+                    <td>${step.step}</td>
+                    <td>${step.calculation}</td>
+                    <td>${step.tax}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
